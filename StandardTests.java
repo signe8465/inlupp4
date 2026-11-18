@@ -18,21 +18,15 @@ public class StandardTests {
     }
 
     @Test
-    void succeedingTest() {
-        assertTrue(true);
+    void someMathTests() {
+        assertTrue(1 > 0);    // Assert that an expression is true
+        assertFalse(0 == 1);  // Assert that an expression is false
+        assertEquals(2+3, 5); // Assert that two objects .equals() each other
+        // Assert that running a piece of code results in a particular exception being thrown:
+        assertThrows(ArithmeticException.class, () -> {int x = 3 / 0;});
     }
 
-    @Test
-    void failingTest() {
-        fail("a failing test");
-    }
-
-    @Test
-    @Disabled("for demonstration purposes")
-    void skippedTest() {
-        // not executed
-    }
-
+    
     @AfterEach
     void tearDown() {
     }
