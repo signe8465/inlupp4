@@ -14,7 +14,9 @@ public class NamedConstant extends Atom{
         return true;
     }
 
+/*
     public SymbolicExpression eval(Environment vars){
         return new Constant(this.value);
     }
+*/
 }

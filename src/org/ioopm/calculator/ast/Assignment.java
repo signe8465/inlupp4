@@ -24,6 +24,12 @@ public Assignment(SymbolicExpression a, SymbolicExpression b){
         return this.getLhs().equals(other.getLhs()) && this.getRhs().equals(other.getRhs());
     }
 
+    @Override
+    public SymbolicExpression accept(Visitor v) {
+        return v.visit(this);
+    }
+
+/*
     public SymbolicExpression eval(Environment vars) {
         if(!(this.getRhs() instanceof Variable)){
             throw new IllegalAssignmentException();
@@ -32,4 +38,5 @@ public Assignment(SymbolicExpression a, SymbolicExpression b){
         SymbolicExpression result = vars.put((Variable) this.getRhs(), lhs);
         return lhs;
     }
+*/
 }

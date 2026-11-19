@@ -25,6 +25,11 @@ public class Addition extends Binary{
         return this.getLhs().equals(other.getLhs()) &&  this.getRhs().equals(other.getRhs());
     }
 
+    @Override
+    public SymbolicExpression accept(Visitor v) {
+        return v.visit(this);
+    }
+/*
     public SymbolicExpression eval(Environment vars) {
         SymbolicExpression lhs = this.getLhs().eval(vars);
         SymbolicExpression rhs = this.getRhs().eval(vars);
@@ -34,4 +39,5 @@ public class Addition extends Binary{
             return new Addition(lhs, rhs);
         }
     }
+*/
 }

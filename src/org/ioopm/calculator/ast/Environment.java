@@ -1,4 +1,17 @@
 package org.ioopm.calculator.ast;
 import java.util.HashMap;
 
-public class Environment extends HashMap<Variable, SymbolicExpression> {}
+public class Environment extends HashMap<Variable, SymbolicExpression> {
+    public String toString(){
+        StringBuilder sb = new StringBuilder();
+        sb.append("Variables: ");
+        TreeSet<Variable> vars = new TreeSet<>(this.keySet());
+        for (Variable v : vars) {
+            sb.append(v.getName());
+            sb.append(" = ");
+            sb.append(this.get(v));
+            sb.append(", ");
+        }
+        return sb.toString();
+    }
+}

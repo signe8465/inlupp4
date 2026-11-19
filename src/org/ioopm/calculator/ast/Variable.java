@@ -26,7 +26,7 @@ public class Variable extends Atom{
      return this.name.equals(other.name);
     }
 
-
+/*
     public SymbolicExpression eval(Environment vars){
         SymbolicExpression result = vars.get(new Variable(this.name));
         if(result != null){
@@ -34,6 +34,7 @@ public class Variable extends Atom{
         }
         return new Variable(this.name);
     }
+*/
 
     public int hashCode(){
         return this.name.hashCode();

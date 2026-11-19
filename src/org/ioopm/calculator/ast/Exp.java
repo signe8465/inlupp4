@@ -20,7 +20,13 @@ public class Exp extends Unary{
     public boolean equals(Exp other) {
         return this.getArgument().equals(other.getArgument());
     }
+    
+    @Override
+    public SymbolicExpression accept(Visitor v) {
+        return v.visit(this);
+    }
 
+/*
     public SymbolicExpression eval(Environment vars) {
         SymbolicExpression arg = this.getArgument().eval(vars);
         if (arg.isConstant()) {
@@ -29,4 +35,5 @@ public class Exp extends Unary{
             return new Exp(arg);
         }
     }
+*/
 }

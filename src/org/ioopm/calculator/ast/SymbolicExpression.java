@@ -34,4 +34,8 @@ public abstract class SymbolicExpression {
     public boolean run(Environment vars) throws IllegalCommandUsageException{
         throw new IllegalCommandUsageException();
     }
+
+    public SymbolicExpression accept(Visitor v) {
+        return v.visit(this);
+    }
 }
