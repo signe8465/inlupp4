@@ -25,6 +25,12 @@ public class Multiplication extends Binary{
         return (this.getLhs().equals(other.getLhs()) || this.getLhs().equals(other.getRhs())) &&  (this.getRhs().equals(other.getLhs()) || this.getRhs().equals(other.getRhs()));
     }
 
+    @Override
+    public SymbolicExpression accept(Visitor v) {
+        return v.visit(this);
+    }
+
+/*
     public SymbolicExpression eval(Environment vars) {
         SymbolicExpression lhs = this.getLhs().eval(vars);
         SymbolicExpression rhs = this.getRhs().eval(vars);
@@ -34,4 +40,5 @@ public class Multiplication extends Binary{
             return new Multiplication(lhs, rhs);
         }
     }
+*/
 }

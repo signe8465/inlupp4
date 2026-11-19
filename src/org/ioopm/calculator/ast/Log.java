@@ -21,12 +21,18 @@ public class Log extends Unary{
         return this.getArgument().equals(other.getArgument());
     }
 
+    @Override
+    public SymbolicExpression accept(Visitor v) {
+        return v.visit(this);
+    }
+/*
     public SymbolicExpression eval(Environment vars) {
         SymbolicExpression arg = this.getArgument().eval(vars);
         if (arg.isConstant()) {
             return new Constant(Math.log(arg.getValue()));
         } else {
             return new Log(arg);
+        }
     }
-    }
+*/
 }

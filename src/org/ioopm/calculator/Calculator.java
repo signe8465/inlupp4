@@ -7,6 +7,7 @@ public class Calculator {
     public static void main(String [] args){
         Scanner sc = new Scanner(System.in);
         final CalculatorParser parser = new CalculatorParser();
+        final EvaluationVisitor evaluator = new EvaluationVisitor();
         final Environment vars = new Environment();
         SymbolicExpression ans = new Variable("ans");
         boolean run = true;
@@ -16,13 +17,13 @@ public class Calculator {
             System.out.print("Please enter an expression: ");
             String input = sc.nextLine();
             try{
-                SymbolicExpression expression = parser.parse(input, vars);
+                final SymbolicExpression expression = parser.parse(input, vars);
                 if(expression.isCommand()){
                     run = expression.run(vars);
                 } else{
-                    SymbolicExpression output = expression.eval(vars);
+                    final SymbolicExpression evaluationResult = evaluator.evaluate(topLevel, variables);
                     SymbolicExpression a = new Assignment(output, ans).eval(vars);
-                    System.out.println(output);
+                    System.out.println(evaluationResult);
                 }
             }catch(Exception e){
                 System.out.println(e);

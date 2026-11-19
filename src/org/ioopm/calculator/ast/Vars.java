@@ -8,10 +8,7 @@ public class Vars extends Command{
         }
 
         public boolean run(Environment vars){
-            for (Variable v : vars.keySet()) {
-                SymbolicExpression value = vars.get(v);
-                System.out.println(v + " = " + value + "\n");
-            }
+            vars.toString();
             return true;
         } 
 }

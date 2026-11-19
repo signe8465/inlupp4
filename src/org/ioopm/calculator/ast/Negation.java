@@ -21,6 +21,12 @@ public class Negation extends Unary{
         return this.getArgument().equals(other.getArgument());
     }
 
+    @Override
+    public SymbolicExpression accept(Visitor v) {
+        return v.visit(this);
+    }
+
+/*
     public SymbolicExpression eval(Environment vars) {
         SymbolicExpression arg = this.getArgument().eval(vars);
         if (arg.isConstant()) {
@@ -29,4 +35,5 @@ public class Negation extends Unary{
             return new Negation(arg);
     }
     }
+*/
 }
