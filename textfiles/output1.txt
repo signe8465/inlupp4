@@ -1,11 +1,20 @@
 [2J[;HWelcome to the Calculator!
-Please enter an expression: 2.0
-Please enter an expression: 0.0
-Please enter an expression: 30.0
-Please enter an expression: 1.0
-Please enter an expression: 1.0
-Please enter an expression: 2.0
-Please enter an expression: 7.0
-Please enter an expression: 0.0
-Please enter an expression: 4.0
+Please enter an expression: 2
+2.0
+Please enter an expression: 2
+0.0
+Please enter an expression: 2
+30.0
+Please enter an expression: 2
+1.0
+Please enter an expression: 2
+1.0
+Please enter an expression: 2
+2.0
+Please enter an expression: 2
+7.0
+Please enter an expression: 2
+0.0
+Please enter an expression: 2
+4.0
 Please enter an expression: 

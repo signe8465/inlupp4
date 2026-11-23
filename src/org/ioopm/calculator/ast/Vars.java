@@ -8,7 +8,11 @@ public class Vars extends Command{
         }
 
         public boolean run(Environment vars){
-            vars.toString();
+            System.out.println(vars.toString());
             return true;
         } 
+
+        public SymbolicExpression accept(Visitor v) {
+            return v.visit(this);
+        }
 }

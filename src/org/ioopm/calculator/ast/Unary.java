@@ -19,10 +19,5 @@ public abstract class Unary extends SymbolicExpression{
     public SymbolicExpression getArgument(){
         return this.argument;
     }
-    
-    @Override
-    public SymbolicExpression accept(Visitor v) {
-        return v.visit(this);
-    }
 
 }

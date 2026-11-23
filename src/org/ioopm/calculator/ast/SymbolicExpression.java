@@ -35,7 +35,6 @@ public abstract class SymbolicExpression {
         throw new IllegalCommandUsageException();
     }
 
-    public SymbolicExpression accept(Visitor v) {
-        return v.visit(this);
-    }
+    public abstract SymbolicExpression accept(Visitor v);
+
 }

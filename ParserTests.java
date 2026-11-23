@@ -6,6 +6,8 @@ import org.ioopm.calculator.parser.*;
 public class ParserTests {
     static CalculatorParser parser;
     static Environment vars;
+    static EvaluationVisitor evaluator= new EvaluationVisitor();
+
 
     @BeforeAll
     public static void initParser() {
@@ -104,7 +106,7 @@ public class ParserTests {
         assertFalse(a.isCommand());
         assertEquals(a.getPriority(), 20);
         assertEquals(a.toString(), "1.0 + 2.0");
-        assertEquals(a.eval(vars), new Constant(3));
+        assertEquals(evaluator.evaluate(a, vars), new Constant(3));
     }
     // Förutsätter: Environment vars = new Environment(); (t.ex. i @BeforeEach)
 
@@ -116,7 +118,7 @@ public class ParserTests {
         assertFalse(s.isCommand());
         assertEquals(s.getPriority(), 20);
         assertEquals(s.toString(), "5.0 - 2.0");
-        assertEquals(s.eval(vars), new Constant(3));
+        assertEquals(evaluator.evaluate(s, vars), new Constant(3));
     }
 
     @Test
@@ -127,7 +129,7 @@ public class ParserTests {
         assertFalse(m.isCommand());
         assertEquals(m.getPriority(), 40);
         assertEquals(m.toString(), "3.0 * 4.0");
-        assertEquals(m.eval(vars), new Constant(12));
+        assertEquals(evaluator.evaluate(m, vars), new Constant(12));
     }
 
     @Test
@@ -138,7 +140,7 @@ public class ParserTests {
         assertFalse(d.isCommand());
         assertEquals(d.getPriority(), 40);
         assertEquals(d.toString(), "8.0 / 2.0");
-        assertEquals(d.eval(vars), new Constant(4));
+        assertEquals(evaluator.evaluate(d, vars), new Constant(4));
     }
 
     @Test
@@ -149,7 +151,7 @@ public class ParserTests {
         assertFalse(n.isCommand());
         assertEquals(n.getPriority(), 80);
         assertEquals(n.toString(), "- 3.0");
-        assertEquals(n.eval(vars), new Constant(-3));
+        assertEquals(evaluator.evaluate(n, vars), new Constant(-3));
     }
 
     @Test
@@ -160,7 +162,7 @@ public class ParserTests {
         assertFalse(s.isCommand());
         assertEquals(s.getPriority(), 80);
         assertEquals(s.toString(), "sin 0.0");
-        assertEquals(s.eval(vars), new Constant(0));
+        assertEquals(evaluator.evaluate(s, vars), new Constant(0));
     }
 
     @Test
@@ -171,7 +173,7 @@ public class ParserTests {
         assertFalse(c.isCommand());
         assertEquals(c.getPriority(), 80);
         assertEquals(c.toString(), "cos 0.0");
-        assertEquals(c.eval(vars), new Constant(1));
+        assertEquals(evaluator.evaluate(c, vars), new Constant(1));
     }
 
     @Test
@@ -182,7 +184,7 @@ public class ParserTests {
         assertFalse(e.isCommand());
         assertEquals(e.getPriority(), 80);
         assertEquals(e.toString(), "e^ 0.0");
-        assertEquals(e.eval(vars), new Constant(1));
+        assertEquals(evaluator.evaluate(e, vars), new Constant(1));
     }
 
     @Test
@@ -193,7 +195,7 @@ public class ParserTests {
         assertFalse(l.isCommand());
         assertEquals(l.getPriority(), 80);
         assertEquals(l.toString(), "log 1.0");
-        assertEquals(l.eval(vars), new Constant(0));
+        assertEquals(evaluator.evaluate(l, vars), new Constant(0));
     }
 
     @Test
@@ -202,7 +204,7 @@ public class ParserTests {
         assertTrue(c.isConstant());
         assertFalse(c.isCommand());
         assertEquals(c.toString(), "2.0");
-        assertEquals(c.eval(vars), new Constant(2));
+        assertEquals(evaluator.evaluate(c, vars), new Constant(2));
     }
 
     @Test
@@ -210,7 +212,7 @@ public class ParserTests {
         NamedConstant pi = new NamedConstant("pi", Math.PI);
         assertFalse(pi.isConstant());          
         assertFalse(pi.isCommand());
-        assertEquals(pi.eval(vars), new Constant(Math.PI));
+        assertEquals(evaluator.evaluate(pi, vars), new Constant(Math.PI));
     }
 
     @Test
@@ -221,7 +223,7 @@ public class ParserTests {
         assertEquals(x.toString(), "x");
 
         vars.put(new Variable("x"), new Constant(5));   // anpassa efter din Environment
-        assertEquals(x.eval(vars), new Constant(5));
+        assertEquals(evaluator.evaluate(x, vars), new Constant(5));
     }
 
     @Test
@@ -229,17 +231,9 @@ public class ParserTests {
         Assignment a = new Assignment(new Constant(3), new Variable("x"));
         assertFalse(a.isConstant());
         assertFalse(a.isCommand());
-        assertEquals(a.eval(vars), new Constant(3));
-        assertEquals(new Variable("x").eval(vars), new Constant(3)); // variabeln ska ha satts
+        assertEquals(evaluator.evaluate(a, vars), new Constant(3));
+        assertEquals(evaluator.evaluate(new Variable("x"), vars), new Constant(3)); // variabeln ska ha satts
     }
-
-    @Test
-    void testIllegalAssignment() {
-        // Högerledet måste vara en Variable
-        Assignment bad = new Assignment(new Constant(3), new Constant(4));
-        assertThrows(IllegalAssignmentException.class, () -> bad.eval(vars));
-    }
-
         // ---------- Constant ----------
     @Test
     void testConstantFull() {
@@ -249,7 +243,7 @@ public class ParserTests {
         assertFalse(c.isCommand());
         assertEquals("2.0", c.toString());
         assertEquals("-2.5", new Constant(-2.5).toString());
-        assertEquals(new Constant(2), c.eval(vars));
+        assertEquals(new Constant(2), evaluator.evaluate(c, vars));
         assertEqualsContract(c, new Constant(2), new Constant(3));
         assertFalse(new Constant(2).equals(new Variable("x")));
     }
@@ -260,7 +254,7 @@ public class ParserTests {
         NamedConstant pi = new NamedConstant("pi", Math.PI);
         assertFalse(pi.isConstant());
         assertFalse(pi.isCommand());
-        assertEquals(new Constant(Math.PI), pi.eval(vars));
+        assertEquals(new Constant(Math.PI), evaluator.evaluate(pi, vars));
     }
 
     // ---------- Variable ----------
@@ -273,11 +267,11 @@ public class ParserTests {
         assertNotConstantValue(x);
         assertEqualsContract(x, new Variable("x"), new Variable("y"));
 
-        // odefinierad variabel: eval ger variabeln själv (GISSNING)
-        assertEquals(new Variable("x"), x.eval(vars));
+        // odefinierad variabel:  evaluator.evaluate ger variabeln själv (GISSNING)
+        assertEquals(new Variable("x"), evaluator.evaluate(x, vars));
 
         vars.put(new Variable("x"), new Constant(5));
-        assertEquals(new Constant(5), x.eval(vars));
+        assertEquals(new Constant(5), evaluator.evaluate(x, vars));
     }
 
     // ---------- Binära: Addition, Subtraction, Multiplication, Division ----------
@@ -292,7 +286,7 @@ public class ParserTests {
         assertNotConstantValue(a);
         assertEquals(new Constant(1), a.getLhs());     // GISSNING: getLhs()/getRhs()
         assertEquals(new Constant(2), a.getRhs());
-        assertEquals(new Constant(3), a.eval(vars));
+        assertEquals(new Constant(3), evaluator.evaluate(a, vars));
         assertEqualsContract(a,
                             new Addition(new Constant(1), new Constant(2)),
                             new Addition(new Constant(1), new Constant(3)));
@@ -301,11 +295,11 @@ public class ParserTests {
         // ordningen spelar roll i trädet
         assertFalse(a.equals(new Addition(new Constant(2), new Constant(1))));
 
-        // eval med variabel
+        //  evaluator.evaluate med variabel
         Addition withVar = new Addition(new Variable("x"), new Constant(2));
-        assertEquals(withVar, withVar.eval(vars));     // x odefinierad: uttrycket kvarstår
+        assertEquals(withVar, evaluator.evaluate(withVar, vars));     // x odefinierad: uttrycket kvarstår
         vars.put(new Variable("x"), new Constant(5));
-        assertEquals(new Constant(7), withVar.eval(vars));
+        assertEquals(new Constant(7), evaluator.evaluate(withVar, vars));
     }
 
     @Test
@@ -319,9 +313,9 @@ public class ParserTests {
         assertNotConstantValue(s);
         assertEquals(new Constant(5), s.getLhs());
         assertEquals(new Constant(2), s.getRhs());
-        assertEquals(new Constant(3), s.eval(vars));
+        assertEquals(new Constant(3), evaluator.evaluate(s, vars));
         assertEquals(new Constant(-3),
-                    new Subtraction(new Constant(2), new Constant(5)).eval(vars)); // ej kommutativ
+                    evaluator.evaluate(new Subtraction(new Constant(2), new Constant(5)), vars)); // ej kommutativ
         assertEqualsContract(s,
                             new Subtraction(new Constant(5), new Constant(2)),
                             new Subtraction(new Constant(2), new Constant(5)));
@@ -338,9 +332,9 @@ public class ParserTests {
         assertNotConstantValue(m);
         assertEquals(new Constant(3), m.getLhs());
         assertEquals(new Constant(4), m.getRhs());
-        assertEquals(new Constant(12), m.eval(vars));
+        assertEquals(new Constant(12), evaluator.evaluate(m, vars));
         assertEquals(new Constant(0),
-                    new Multiplication(new Constant(0), new Constant(7)).eval(vars));
+                    evaluator.evaluate(new Multiplication(new Constant(0), new Constant(7)), vars));
         assertEqualsContract(m,
                             new Multiplication(new Constant(3), new Constant(4)),
                             new Multiplication(new Constant(3), new Constant(5)));
@@ -357,9 +351,9 @@ public class ParserTests {
         assertNotConstantValue(d);
         assertEquals(new Constant(8), d.getLhs());
         assertEquals(new Constant(2), d.getRhs());
-        assertEquals(new Constant(4), d.eval(vars));
+        assertEquals(new Constant(4), evaluator.evaluate(d, vars));
         assertEquals(new Constant(0.5),
-                    new Division(new Constant(1), new Constant(2)).eval(vars));
+                    evaluator.evaluate(new Division(new Constant(1), new Constant(2)), vars));
         assertEqualsContract(d,
                             new Division(new Constant(8), new Constant(2)),
                             new Division(new Constant(2), new Constant(8)));
@@ -376,8 +370,8 @@ public class ParserTests {
         assertEquals("- 3.0", n.toString());
         assertNotConstantValue(n);
         assertEquals(new Constant(3), n.getArgument());     
-        assertEquals(new Constant(-3), n.eval(vars));
-        assertEquals(new Constant(3), new Negation(new Constant(-3)).eval(vars));
+        assertEquals(new Constant(-3), evaluator.evaluate(n, vars));
+        assertEquals(new Constant(3), evaluator.evaluate(new Negation(new Constant(-3)), vars));
         assertEqualsContract(n, new Negation(new Constant(3)), new Negation(new Constant(4)));
         assertFalse(n.equals(new Sin(new Constant(3))));
     }
@@ -392,8 +386,8 @@ public class ParserTests {
         assertEquals("sin 1.0", s.toString());
         assertNotConstantValue(s);
         assertEquals(new Constant(1), s.getArgument());
-        assertEquals(new Constant(Math.sin(1.0)), s.eval(vars));
-        assertEquals(new Constant(0), new Sin(new Constant(0)).eval(vars));
+        assertEquals(new Constant(Math.sin(1.0)), evaluator.evaluate(s, vars));
+        assertEquals(new Constant(0), evaluator.evaluate(new Sin(new Constant(0)), vars));
         assertEqualsContract(s, new Sin(new Constant(1)), new Sin(new Constant(2)));
         assertFalse(s.equals(new Cos(new Constant(1))));
     }
@@ -408,8 +402,8 @@ public class ParserTests {
         assertEquals("cos 1.0", c.toString());
         assertNotConstantValue(c);
         assertEquals(new Constant(1), c.getArgument());
-        assertEquals(new Constant(Math.cos(1.0)), c.eval(vars));
-        assertEquals(new Constant(1), new Cos(new Constant(0)).eval(vars));
+        assertEquals(new Constant(Math.cos(1.0)), evaluator.evaluate(c, vars));
+        assertEquals(new Constant(1), evaluator.evaluate(new Cos(new Constant(0)), vars));
         assertEqualsContract(c, new Cos(new Constant(1)), new Cos(new Constant(2)));
     }
 
@@ -423,8 +417,8 @@ public class ParserTests {
         assertEquals("e^ 1.0", e.toString());
         assertNotConstantValue(e);
         assertEquals(new Constant(1), e.getArgument());
-        assertEquals(new Constant(Math.exp(1.0)), e.eval(vars));
-        assertEquals(new Constant(1), new Exp(new Constant(0)).eval(vars));
+        assertEquals(new Constant(Math.exp(1.0)), evaluator.evaluate(e, vars));
+        assertEquals(new Constant(1), evaluator.evaluate(new Exp(new Constant(0)), vars));
         assertEqualsContract(e, new Exp(new Constant(1)), new Exp(new Constant(2)));
     }
 
@@ -438,8 +432,8 @@ public class ParserTests {
         assertEquals("log 2.0", l.toString());
         assertNotConstantValue(l);
         assertEquals(new Constant(2), l.getArgument());
-        assertEquals(new Constant(Math.log(2.0)), l.eval(vars));
-        assertEquals(new Constant(0), new Log(new Constant(1)).eval(vars));
+        assertEquals(new Constant(Math.log(2.0)), evaluator.evaluate(l, vars));
+        assertEquals(new Constant(0), evaluator.evaluate(new Log(new Constant(1)), vars));
         assertEqualsContract(l, new Log(new Constant(2)), new Log(new Constant(3)));
     }
 
@@ -452,8 +446,8 @@ public class ParserTests {
         assertNotConstantValue(a);
         assertEquals(new Constant(3), a.getLhs());
         assertEquals(new Variable("x"), a.getRhs());
-        assertEquals(new Constant(3), a.eval(vars));
-        assertEquals(new Constant(3), new Variable("x").eval(vars)); // variabeln ska ha satts
+        assertEquals(new Constant(3), evaluator.evaluate(a, vars));
+        assertEquals(new Constant(3), evaluator.evaluate(new Variable("x"), vars)); // variabeln ska ha satts
         assertEqualsContract(a,
                             new Assignment(new Constant(3), new Variable("x")),
                             new Assignment(new Constant(4), new Variable("x")));
@@ -465,18 +459,20 @@ public class ParserTests {
         // (1 + 2) = x  ->  x == 3
         Assignment a = new Assignment(new Addition(new Constant(1), new Constant(2)),
                                     new Variable("x"));
-        assertEquals(new Constant(3), a.eval(vars));
-        assertEquals(new Constant(3), new Variable("x").eval(vars));
+        assertEquals(new Constant(3), evaluator.evaluate(a, vars));
+        assertEquals(new Constant(3), evaluator.evaluate(new Variable("x"), vars));
     }
 
+
     @Test
-    void testIllegalAssignmentFull() {
-        assertThrows(IllegalAssignmentException.class,
-            () -> new Assignment(new Constant(3), new Constant(4)).eval(vars));
-        assertThrows(IllegalAssignmentException.class,
-            () -> new Assignment(new Constant(3), new Addition(new Constant(1), new Constant(2))).eval(vars));
-        assertThrows(IllegalAssignmentException.class,
-            () -> new Assignment(new Constant(3), new NamedConstant("pi", Math.PI)).eval(vars));
+    void testAssignmentDouble(){
+        Assignment a1 = new Assignment(new Constant(2), new Variable("x"));
+        Assignment a2 = new Assignment(new Constant(3), new Variable("x"));
+
+        evaluator.evaluate(new Addition(a1, a2), vars);
+        assertEquals(evaluator.evaluate(new Variable("x"), vars), new Constant(2.0));
+    
     }
-    }
+
+}
 

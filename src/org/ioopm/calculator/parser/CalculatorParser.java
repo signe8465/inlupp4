@@ -67,10 +67,10 @@ public class CalculatorParser {
             if (this.st.sval.equals("Quit") || this.st.sval.equals("Vars") || this.st.sval.equals("Clear")) { // sval = string Variable
                 result = command();
             } else {
-                result = assignment(); // gÃ¥r vidare med uttrycket.
+                result = assignment(); // går vidare med uttrycket.
             }
         } else {
-            result = assignment(); // om inte == word, gÃ¥ till assignment Ã¤ndÃ¥ (kan vara tt_number)
+            result = assignment(); // om inte == word, gå till assignment Ändå (kan vara tt_number)
         }
 
         if (this.st.nextToken() != this.st.TT_EOF) { // token should be an end of stream token if we are done

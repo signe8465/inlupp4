@@ -19,11 +19,19 @@ public class Calculator {
             try{
                 final SymbolicExpression expression = parser.parse(input, vars);
                 if(expression.isCommand()){
-                    run = expression.run(vars);
+                    if(expression instanceof Quit){
+                        run = false;
+                    } else if(expression instanceof Clear){
+                        vars.clear();
+                    } else if(expression instanceof Vars){
+                        System.out.println(vars.toString());
+                    }
                 } else{
-                    final SymbolicExpression evaluationResult = evaluator.evaluate(topLevel, variables);
-                    SymbolicExpression a = new Assignment(output, ans).eval(vars);
-                    System.out.println(evaluationResult);
+                    final SymbolicExpression evaluationResult = evaluator.evaluate(expression, vars);
+                    if(evaluationResult != null){
+                        new Assignment(evaluationResult, ans);
+                        System.out.println(evaluationResult);
+                    }
                 }
             }catch(Exception e){
                 System.out.println(e);

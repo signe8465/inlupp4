@@ -7,8 +7,7 @@ public class Clear extends Command{
             return theInstance;
         }
 
-        public boolean run(Environment vars){
-            vars.clear();
-            return true;
+        public SymbolicExpression accept(Visitor v) {
+            return v.visit(this);
         }
 }

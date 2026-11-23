@@ -40,4 +40,8 @@ public class Variable extends Atom{
         return this.name.hashCode();
     }
 
+    public SymbolicExpression accept(Visitor v) {
+        return v.visit(this);
+    }
+
 }

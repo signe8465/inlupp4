@@ -14,6 +14,17 @@ public class NamedConstant extends Atom{
         return true;
     }
 
+    public SymbolicExpression accept(Visitor v) {
+        return v.visit(this);
+    }
+    
+    public double getValue(){
+        return this.value;
+    }
+
+    public String toString() {
+        return this.name;
+    }
 /*
     public SymbolicExpression eval(Environment vars){
         return new Constant(this.value);

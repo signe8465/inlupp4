@@ -21,7 +21,7 @@ public class Negation extends Unary{
         return this.getArgument().equals(other.getArgument());
     }
 
-    @Override
+     
     public SymbolicExpression accept(Visitor v) {
         return v.visit(this);
     }

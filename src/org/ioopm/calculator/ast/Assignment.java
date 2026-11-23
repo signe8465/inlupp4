@@ -5,7 +5,7 @@ public Assignment(SymbolicExpression a, SymbolicExpression b){
         super(a, b);
     }
     public String getName(){
-        throw new RuntimeException("getName() called on expression with no operator");
+        return "=";
     }
 
     public int getPriority(){
@@ -24,7 +24,7 @@ public Assignment(SymbolicExpression a, SymbolicExpression b){
         return this.getLhs().equals(other.getLhs()) && this.getRhs().equals(other.getRhs());
     }
 
-    @Override
+     
     public SymbolicExpression accept(Visitor v) {
         return v.visit(this);
     }

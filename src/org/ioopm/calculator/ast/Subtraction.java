@@ -25,7 +25,7 @@ public class Subtraction extends Binary{
         return this.getLhs().equals(other.getLhs()) && this.getRhs().equals(other.getRhs());
     }
 
-    @Override
+     
     public SymbolicExpression accept(Visitor v) {
         return v.visit(this);
     }

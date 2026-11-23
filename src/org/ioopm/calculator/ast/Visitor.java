@@ -13,4 +13,8 @@ public interface Visitor {
     public SymbolicExpression visit(Sin n);
     public SymbolicExpression visit(Subtraction n);
     public SymbolicExpression visit(Variable n);
+    public SymbolicExpression visit(Clear n);
+    public SymbolicExpression visit(Vars n);
+    public SymbolicExpression visit(Quit n);
+    public SymbolicExpression visit(NamedConstant n);
 }

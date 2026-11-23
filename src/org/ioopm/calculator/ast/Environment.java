@@ -1,5 +1,6 @@
 package org.ioopm.calculator.ast;
 import java.util.HashMap;
+import java.util.TreeSet;
 
 public class Environment extends HashMap<Variable, SymbolicExpression> {
     public String toString(){
@@ -10,7 +11,7 @@ public class Environment extends HashMap<Variable, SymbolicExpression> {
             sb.append(v.getName());
             sb.append(" = ");
             sb.append(this.get(v));
-            sb.append(", ");
+            sb.append("\n");
         }
         return sb.toString();
     }
