@@ -2,11 +2,13 @@
 
     public class EvaluationVisitor implements Visitor {
         private Environment env = null;
+        private Stack scopeStack;
         private String errorText = "";
         private boolean err = false;
         private List variableList = null;
-        public SymbolicExpression evaluate(SymbolicExpression expression, Environment env) {
-            this.env = env;
+        public SymbolicExpression evaluate(SymbolicExpression expression, Stack scopeStack) {
+            this.scopeStack = scopeStack;
+            this.env = this.scopeStack.getEnvironment();
             variableList = new List();
             SymbolicExpression tmp = null;
             try{
@@ -205,5 +207,15 @@
             return n;
         }
 
-        
+        public SymbolicExpression visit(ScopeStart n){
+            this.env = this.scopeStack.push(new Environment());
+            SymbolicExpression result = n.getArgument().accept(this);
+            return result;
+        }
+
+        public SymbolicExpression visit(ScopeStop n){
+            this.env = this.scopeStack.pop();
+            return n;
+        }
+
     }

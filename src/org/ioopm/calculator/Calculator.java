@@ -8,7 +8,7 @@ public class Calculator {
         Scanner sc = new Scanner(System.in);
         final CalculatorParser parser = new CalculatorParser();
         final EvaluationVisitor evaluator = new EvaluationVisitor();
-        final Environment vars = new Environment();
+        Stack scopeStack = new Stack(new Environment());
         SymbolicExpression ans = new Variable("ans");
         boolean run = true;
         System.out.print("\033[2J\033[;H");
@@ -17,17 +17,17 @@ public class Calculator {
             System.out.print("Please enter an expression: ");
             String input = sc.nextLine();
             try{
-                final SymbolicExpression expression = parser.parse(input, vars);
+                final SymbolicExpression expression = parser.parse(input, scopeStack.getEnvironment());
                 if(expression.isCommand()){
                     if(expression instanceof Quit){
                         run = false;
                     } else if(expression instanceof Clear){
-                        vars.clear();
+                        scopeStack.getEnvironment().clear();
                     } else if(expression instanceof Vars){
-                        System.out.println(vars.toString());
+                        System.out.println(scopeStack.getEnvironment().toString());
                     }
                 } else{
-                    final SymbolicExpression evaluationResult = evaluator.evaluate(expression, vars);
+                    final SymbolicExpression evaluationResult = evaluator.evaluate(expression, scopeStack);
                     if(evaluationResult != null){
                         new Assignment(evaluationResult, ans);
                         System.out.println(evaluationResult);

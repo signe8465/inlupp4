@@ -25,6 +25,8 @@ public class CalculatorParser {
     private static String LOG = "Log";
     private static String EXP = "Exp";
     private static char ASSIGNMENT = '=';
+    private static char SCOPESTART = '{';
+    private static char SCOPESTOP = '}';
 
     // unallowerdVars is used to check if variabel name that we
     // want to assign new meaning to is a valid name eg 3 = Quit
@@ -58,11 +60,10 @@ public class CalculatorParser {
      */
     private SymbolicExpression statement() throws IOException {
         SymbolicExpression result;
-        this.st.nextToken(); //kollar pÃ¥ nÃ¤sta token som ligger pÃ¥ strÃ¶mmen
+        this.st.nextToken(); //kollar på nästa token som ligger på strömmen
         if (this.st.ttype == this.st.TT_EOF) {
             throw new SyntaxErrorException("Error: Expected an expression");
         }
-
         if (this.st.ttype == this.st.TT_WORD) { // vilken typ det senaste tecken vi lÃ¤ste in hade.
             if (this.st.sval.equals("Quit") || this.st.sval.equals("Vars") || this.st.sval.equals("Clear")) { // sval = string Variable
                 result = command();
@@ -96,7 +97,7 @@ public class CalculatorParser {
             return Clear.instance();
         } else {
             return Vars.instance();
-        }
+        } 
     }
 
 
@@ -227,7 +228,9 @@ public class CalculatorParser {
                 st.sval.equals(COS) ||
                 st.sval.equals(EXP) ||
                 st.sval.equals(NEG) ||
-                st.sval.equals(LOG)) {
+                st.sval.equals(LOG) ||
+                st.sval.equals(SCOPESTART))
+                {
 
                 result = unary();
             } else {
@@ -259,10 +262,26 @@ public class CalculatorParser {
             result = new Cos(primary());
         } else if (operation.equals(LOG)) {
             result = new Log(primary());
-        } else {
+        } else if(operation.equals(EXP)){
             result = new Exp(primary());
-        }
+        } else {
+            result = new ScopeStart(primary());
+        } 
+
         return result;
+    }
+
+       /**
+     * Checks what type of Function operation the token read is and
+     * then continues with the expression that the operator holds
+     * @return a SymbolicExpression to be evaluated
+     * @throws IOException by nextToken() if it reads invalid input
+     */
+    private SymbolicExpression function() throws IOException {
+        if(this.st.ttype == SCOPESTOP){
+            return new ScopeStop();
+        }
+        return null;
     }
 
     /**
@@ -276,7 +295,11 @@ public class CalculatorParser {
         this.st.nextToken();
         if (this.st.ttype == this.st.TT_NUMBER) {
             return new Constant(this.st.nval);
-        } else {
+        } else if(this.st.ttype == SCOPESTOP){
+            function();
+            return new ScopeStop();
+        } 
+        else {
             throw new SyntaxErrorException("Error: Expected number");
         }
     }
