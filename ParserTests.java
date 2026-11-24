@@ -462,16 +462,60 @@ public class ParserTests {
         assertEquals(new Constant(3), evaluator.evaluate(a, vars));
         assertEquals(new Constant(3), evaluator.evaluate(new Variable("x"), vars));
     }
+    
+    @Test
+    void Scope1(){
+        ScopeStart S1 = new ScopeStart(new Assignment(new Constant(3), new Variable("x")));
+        ScopeStart S2 = new ScopeStart(new Assignment(new Constant(3), new Variable("x")));
+        SymbolicExpression S1R = evaluator.evaluate(S1, vars);
+        SymbolicExpression S2R = evaluator.evaluate(S2, vars);
+        Addition A = new Addition(S1, S2);
+        SymbolicExpression AR = evaluator.evaluate(A, vars);
 
+        assertEquals(new Constant(3), S1R );
+        assertEquals(S1R, S2R);
+        assertEquals(new Constant(6), AR);
+    }
 
     @Test
-    void testAssignmentDouble(){
-        Assignment a1 = new Assignment(new Constant(2), new Variable("x"));
-        Assignment a2 = new Assignment(new Constant(3), new Variable("x"));
+    void Scope2(){
+        ScopeStart S1 = new ScopeStart(new Assignment(new Constant(1), new Variable("x")));
+        ScopeStart S2 = new ScopeStart(new Variable("x"));
+        SymbolicExpression S1R = evaluator.evaluate(S1, vars);
+        Addition A = new Addition(S1, S2);
+        SymbolicExpression AR = evaluator.evaluate(A, vars);
 
-        evaluator.evaluate(new Addition(a1, a2), vars);
-        assertEquals(evaluator.evaluate(new Variable("x"), vars), new Constant(2.0));
+        assertEquals(new Constant(1), S1R );
+        assertEquals(new Addition(new Constant(1.0), new Variable("x")), AR);
+    }
+
+    @Test
+    void Scope3(){
+        ScopeStart S1 = new ScopeStart(new Assignment(new ScopeStart(new Assignment(new Constant(1), new Variable("x"))), new Variable("x")));
+        assertEquals( new Constant(1), evaluator.evaluate(S1, vars));
+    }
+
+    @Test
+    void Scope4(){
+        Assignment A1 = new Assignment(new Constant(2), new Variable("x"));
+        ScopeStart S2 = new ScopeStart(new Assignment(new Constant(1), new Variable("x")));
+        Addition A = new Addition(A1, S2);
+        ScopeStart S3 = new ScopeStart(A);
+        SymbolicExpression AR = evaluator.evaluate(S3, vars);
+
+        assertEquals(new Constant(3), AR);
+    }
     
+    @Test
+    void Scope5(){
+        Assignment AS1 = new Assignment(new Constant(1), new Variable("x"));
+        ScopeStart S1 = new ScopeStart(new Assignment(new Addition(new Constant(3), new Variable("x")), new Variable("x")));
+        Assignment AS2 = new Assignment(new Addition(new Constant(2), new Variable("x")), new Variable("x"));
+        Addition A1 = new Addition(AS2, S1);
+        ScopeStart S2 = new ScopeStart(A1);
+        Addition A2 = new Addition(AS1, S2);
+
+        assertEquals(new Constant(10), evaluator.evaluate(A2, vars));
     }
 
 }

@@ -10,7 +10,7 @@ public class ScopeStart extends Unary{
     }
 
     public String getName() {
-        return "{";
+        return "{" + getArgument().toString() + "}";
     }
 
     public boolean equals(Object other) {

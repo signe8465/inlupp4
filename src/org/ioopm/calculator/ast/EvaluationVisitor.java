@@ -6,10 +6,10 @@
         private String errorText = "";
         private boolean err = false;
         private List variableList = null;
-        public SymbolicExpression evaluate(SymbolicExpression expression, Stack scopeStack) {
-            this.scopeStack = scopeStack;
-            this.env = this.scopeStack.getEnvironment();
+        public SymbolicExpression evaluate(SymbolicExpression expression, Environment vars) {
             variableList = new List();
+            this.scopeStack = new Stack(vars, variableList);
+            this.env = scopeStack.getEnvironment();
             SymbolicExpression tmp = null;
             try{
                 tmp = expression.accept(this);
@@ -29,6 +29,7 @@
         private void errorCheck(Exception e){
             System.out.println( e + errorText );
             errorText = "";
+            throw new RuntimeException("Evaluation failed: " + e.getMessage(), e);
         }
         // This method gets called from Addition.accept(Visitor v) -- you should
         // be able to see from the eval() methods how these should behave (i.e., 
@@ -155,7 +156,15 @@
         public SymbolicExpression visit(Variable n){
 
             SymbolicExpression result = this.env.get(new Variable(n.toString()));
-
+            Scope i = scopeStack.getTopScope();
+            int number = 0;
+            while(result == null && i.nextScope() != null){
+                result = i.nextScope().getEnvironment().get(new Variable(n.toString()));
+                System.out.println(result + " " + number);
+                i = i.nextScope();
+                number++;
+            }
+            
             if(result != null){
                 return result;
             } else {
@@ -180,7 +189,7 @@
                 err = true;
             }
             if(!err){
-                variableList.addNode(rhs);
+                scopeStack.getVariableList().addNode(rhs);
                 this.env.put((Variable) rhs, lhs);
             }
             return lhs;
@@ -210,12 +219,8 @@
         public SymbolicExpression visit(ScopeStart n){
             this.env = this.scopeStack.push(new Environment());
             SymbolicExpression result = n.getArgument().accept(this);
-            return result;
-        }
-
-        public SymbolicExpression visit(ScopeStop n){
             this.env = this.scopeStack.pop();
-            return n;
+            return result;
         }
 
     }

@@ -26,7 +26,6 @@ public class CalculatorParser {
     private static String EXP = "Exp";
     private static char ASSIGNMENT = '=';
     private static char SCOPESTART = '{';
-    private static char SCOPESTOP = '}';
 
     // unallowerdVars is used to check if variabel name that we
     // want to assign new meaning to is a valid name eg 3 = Quit
@@ -47,6 +46,7 @@ public class CalculatorParser {
         this.vars = vars;
         this.st.ordinaryChar('-');
         this.st.ordinaryChar('/');
+        this.st.ordinaryChar('{');
         this.st.eolIsSignificant(true);
         SymbolicExpression result = statement(); // calls to statement
         return result; // the final result
@@ -214,14 +214,14 @@ public class CalculatorParser {
      */
     private SymbolicExpression primary() throws IOException {
         SymbolicExpression result;
-        if (this.st.ttype == '(') {
+        if (this.st.ttype == '(') { //HÄR LÄGGER VI IN LOGIK RUNT SLUTPARANTESER
             this.st.nextToken();
             result = assignment();
             /// This captures unbalanced parentheses!
             if (this.st.nextToken() != ')') {
                 throw new SyntaxErrorException("expected ')'");
             }
-        } else if (this.st.ttype == NEGATION) {
+        } else if (this.st.ttype == NEGATION || this.st.ttype == SCOPESTART) {
             result = unary();
         } else if (this.st.ttype == this.st.TT_WORD) {
             if (st.sval.equals(SIN) ||
@@ -251,10 +251,18 @@ public class CalculatorParser {
      */
     private SymbolicExpression unary() throws IOException {
         SymbolicExpression result;
-        int operationNeg = st.ttype;
+        int charval = st.ttype;
         String operation = st.sval;
         this.st.nextToken();
-        if (operationNeg == NEGATION || operation.equals(NEG)) {
+        if (charval == SCOPESTART )
+        {
+            result = new ScopeStart(assignment());
+            if (this.st.nextToken() != '}') {
+                throw new SyntaxErrorException("expected '}'");
+            }
+            return result;
+        } 
+        else if (charval == NEGATION || operation.equals(NEG)) {
             result = new Negation(primary());
         } else if (operation.equals(SIN)) {
             result = new Sin(primary());
@@ -262,11 +270,9 @@ public class CalculatorParser {
             result = new Cos(primary());
         } else if (operation.equals(LOG)) {
             result = new Log(primary());
-        } else if(operation.equals(EXP)){
+        } else{
             result = new Exp(primary());
-        } else {
-            result = new ScopeStart(primary());
-        } 
+        }  
 
         return result;
     }
@@ -278,9 +284,6 @@ public class CalculatorParser {
      * @throws IOException by nextToken() if it reads invalid input
      */
     private SymbolicExpression function() throws IOException {
-        if(this.st.ttype == SCOPESTOP){
-            return new ScopeStop();
-        }
         return null;
     }
 
@@ -295,10 +298,7 @@ public class CalculatorParser {
         this.st.nextToken();
         if (this.st.ttype == this.st.TT_NUMBER) {
             return new Constant(this.st.nval);
-        } else if(this.st.ttype == SCOPESTOP){
-            function();
-            return new ScopeStop();
-        } 
+        }
         else {
             throw new SyntaxErrorException("Error: Expected number");
         }
