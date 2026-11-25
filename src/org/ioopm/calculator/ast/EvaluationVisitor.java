@@ -223,4 +223,113 @@
             return result;
         }
 
+        public SymbolicExpression visit(Equals n){
+            SymbolicExpression lhs = n.getLhs();
+            SymbolicExpression rhs = n.getRhs();
+            if(!(n.getLhs().isConstant())){
+                lhs = lhs.accept(this);
+            }
+            if(!(n.getRhs().isConstant())){
+                rhs = rhs.accept(this);
+            }
+            
+            if(lhs.equals(rhs)){
+                return new Constant(1);
+            } else{
+                return new Constant(0);
+            }
+        }
+
+        public SymbolicExpression visit( GreaterThanOrEqual n){
+            SymbolicExpression lhs = n.getLhs();
+            SymbolicExpression rhs = n.getRhs();
+            if(!(n.getLhs().isConstant())){
+                lhs = lhs.accept(this);
+            }
+            if(!(n.getRhs().isConstant())){
+                rhs = rhs.accept(this);
+            }
+            if (lhs.isConstant() && rhs.isConstant()) {
+                if(lhs.getValue() >= rhs.getValue()){
+                    return new Constant(1);
+                } else{
+                    return new Constant(0);
+            }
+            } else {
+                throw new IllegalComparisonException();
+            }
+            
+        }
+
+        public SymbolicExpression visit(LessThanOrEqual n){
+            SymbolicExpression lhs = n.getLhs();
+            SymbolicExpression rhs = n.getRhs();
+            if(!(n.getLhs().isConstant())){
+                lhs = lhs.accept(this);
+            }
+            if(!(n.getRhs().isConstant())){
+                rhs = rhs.accept(this);
+            }
+            if (lhs.isConstant() && rhs.isConstant()) {
+                if(lhs.getValue() <= rhs.getValue()){
+                    return new Constant(1);
+                } else{
+                    return new Constant(0);
+            }
+            } else {
+                throw new IllegalComparisonException();
+            }
+        }
+
+        public SymbolicExpression visit(GreaterThan n){
+            SymbolicExpression lhs = n.getLhs();
+            SymbolicExpression rhs = n.getRhs();
+            if(!(n.getLhs().isConstant())){
+                lhs = lhs.accept(this);
+            }
+            if(!(n.getRhs().isConstant())){
+                rhs = rhs.accept(this);
+            }
+
+            
+            if (lhs.isConstant() && rhs.isConstant()) {
+                if(lhs.getValue() > rhs.getValue()){
+                    return new Constant(1);
+                } else{
+                    return new Constant(0);
+            }
+            } else {
+                throw new IllegalComparisonException();
+            }
+        }
+
+        public SymbolicExpression visit(LessThan n){
+            SymbolicExpression lhs = n.getLhs();
+            SymbolicExpression rhs = n.getRhs();
+            if(!(n.getLhs().isConstant())){
+                lhs = lhs.accept(this);
+            }
+            if(!(n.getRhs().isConstant())){
+                rhs = rhs.accept(this);
+            }
+            
+            if (lhs.isConstant() && rhs.isConstant()) {
+                if(lhs.getValue() < rhs.getValue()){
+                    return new Constant(1);
+                } else{
+                    return new Constant(0);
+            }
+            } else {
+                throw new IllegalComparisonException();
+            }
+        }
+
+        public SymbolicExpression visit(Conditional n){
+            SymbolicExpression result = n.getOp().accept(this);
+            if(result.getValue() == 1){
+                return n.getIfScope().accept(this);
+            }else{
+                return n.getElseScope().accept(this);
+            }
+        }
     }

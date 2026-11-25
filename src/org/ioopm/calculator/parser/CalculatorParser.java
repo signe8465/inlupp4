@@ -26,13 +26,19 @@ public class CalculatorParser {
     private static String EXP = "Exp";
     private static char ASSIGNMENT = '=';
     private static char SCOPESTART = '{';
+    private static String IF = "if";
+    private static char LESSTHAN = '<';
+    private static char GREATERTHAN = '>';
+    private static String LESSTHANOREQUAL = "=";
+    private static String GREATERTHANOREQUAL = ">=";
+    private static String EQUALS = "==";
 
     // unallowerdVars is used to check if variabel name that we
     // want to assign new meaning to is a valid name eg 3 = Quit
     // or 10 + x = L is not allowed
     private final ArrayList < String > unallowedVars = new ArrayList < String > (Arrays.asList("Quit",
         "Vars",
-        "Clear"));
+        "Clear")); //FÖRBJUDNA HÄR
 
     /**
      * Used to parse the inputted string by the Calculator program
@@ -47,6 +53,8 @@ public class CalculatorParser {
         this.st.ordinaryChar('-');
         this.st.ordinaryChar('/');
         this.st.ordinaryChar('{');
+        this.st.ordinaryChar('>');
+        this.st.ordinaryChar('<');
         this.st.eolIsSignificant(true);
         SymbolicExpression result = statement(); // calls to statement
         return result; // the final result
@@ -67,7 +75,9 @@ public class CalculatorParser {
         if (this.st.ttype == this.st.TT_WORD) { // vilken typ det senaste tecken vi lÃ¤ste in hade.
             if (this.st.sval.equals("Quit") || this.st.sval.equals("Vars") || this.st.sval.equals("Clear")) { // sval = string Variable
                 result = command();
-            } else {
+            } else if(this.st.sval.equals(IF)){
+                result = function();
+            }else{
                 result = assignment(); // går vidare med uttrycket.
             }
         } else {
@@ -119,7 +129,7 @@ public class CalculatorParser {
             } else if (this.st.ttype != this.st.TT_WORD) {
                 throw new SyntaxErrorException("Error: Not a valid assignment of a variable"); //this handles faulty inputs after the equal sign eg. 1 = (x etc
             } else {
-                if (this.st.sval.equals("ans")) {
+                if (this.st.sval.equals("ans")) { //LOGIK OM FÖRBJUDNA VARIABLER GÅR NOG IN HÄR
                     throw new SyntaxErrorException("Error: ans cannot be redefined");
                 }
                 SymbolicExpression key = identifier();
@@ -213,7 +223,7 @@ public class CalculatorParser {
      *         missing right parantheses
      */
     private SymbolicExpression primary() throws IOException {
-        SymbolicExpression result;
+        SymbolicExpression result ;
         if (this.st.ttype == '(') { //HÄR LÄGGER VI IN LOGIK RUNT SLUTPARANTESER
             this.st.nextToken();
             result = assignment();
@@ -221,7 +231,9 @@ public class CalculatorParser {
             if (this.st.nextToken() != ')') {
                 throw new SyntaxErrorException("expected ')'");
             }
-        } else if (this.st.ttype == NEGATION || this.st.ttype == SCOPESTART) {
+        
+        } 
+        else if (this.st.ttype == NEGATION || this.st.ttype == SCOPESTART) {
             result = unary();
         } else if (this.st.ttype == this.st.TT_WORD) {
             if (st.sval.equals(SIN) ||
@@ -239,6 +251,9 @@ public class CalculatorParser {
         } else {
             this.st.pushBack();
             result = number();
+        }
+        if (result == null){
+            throw new SyntaxErrorException("Något gick fel i primary()");
         }
         return result;
     }
@@ -284,7 +299,32 @@ public class CalculatorParser {
      * @throws IOException by nextToken() if it reads invalid input
      */
     private SymbolicExpression function() throws IOException {
-        return null;
+        SymbolicExpression result = null;
+        if(this.st.sval.equals(IF))
+        {
+            this.st.nextToken();
+            SymbolicExpression op = operator();
+            this.st.nextToken(); 
+            SymbolicExpression IfScope = assignment();
+            if(!(IfScope instanceof ScopeStart)){
+                throw new SyntaxErrorException("inget start på if-scope");
+            }
+            this.st.nextToken();
+            if (!this.st.sval.equals("else")) {
+                throw new SyntaxErrorException("Else-sats saknas");
+            }
+            this.st.nextToken();
+            SymbolicExpression ElseScope = assignment();
+            if(!(ElseScope instanceof ScopeStart)){
+                throw new SyntaxErrorException("inget start på else-scope");
+            }
+            result = new Conditional(op, IfScope, ElseScope);
+
+        }
+        if(result == null){
+            throw new SyntaxErrorException("Något gick fel i function()");
+        }
+        return result;
     }
 
     /**
@@ -301,6 +341,30 @@ public class CalculatorParser {
         }
         else {
             throw new SyntaxErrorException("Error: Expected number");
+        }
+    }
+
+    private SymbolicExpression operator() throws IOException{
+        SymbolicExpression result = expression();
+        this.st.nextToken();
+        if(this.st.ttype == GREATERTHAN){
+            this.st.nextToken();
+            if(this.st.ttype == ASSIGNMENT){
+                this.st.nextToken();
+                return result = new GreaterThanOrEqual(result, expression());
+            }
+            return result = new GreaterThan(result, expression());
+        } else if(this.st.ttype == LESSTHAN){
+            this.st.nextToken();
+            if(this.st.ttype == ASSIGNMENT){
+                this.st.nextToken();
+                return result = new LessThanOrEqual(result, expression());
+            }
+            return result = new LessThan(result, expression());
+        } else{
+            this.st.nextToken();            
+            this.st.nextToken();
+            return result = new Equals(result, expression());
         }
     }
 }

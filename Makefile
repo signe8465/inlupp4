@@ -17,10 +17,8 @@ run: compile
 	java -ea -cp classes $(MAIN)
 
 tests:
-	javac -cp "$(JUNIT):src" -d tests StandardTests.java
-	javac -cp "$(JUNIT):src" -d tests ParserTests.java
-	java -jar $(JUNIT) -cp tests -c StandardTests
-	java -jar $(JUNIT) -cp tests -c ParserTests
+	javac -cp "$(JUNIT):src" -d tests Tests.java
+	java -jar $(JUNIT) -cp tests -c Tests
 
 # Vi tar bort kompileringen härifrån eftersom "compile"-steget gör det nu
 systemtests: compile

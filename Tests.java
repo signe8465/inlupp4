@@ -3,7 +3,7 @@ import org.junit.jupiter.api.*;
 import org.ioopm.calculator.ast.*;
 import org.ioopm.calculator.parser.*;
 
-public class ParserTests {
+public class Tests {
     static CalculatorParser parser;
     static Environment vars;
     static EvaluationVisitor evaluator= new EvaluationVisitor();
@@ -516,6 +516,18 @@ public class ParserTests {
         Addition A2 = new Addition(AS1, S2);
 
         assertEquals(new Constant(10), evaluator.evaluate(A2, vars));
+    }
+
+    @Test
+    void IfElse(){
+        evaluator.evaluate(new Assignment(new Constant(3), new Variable("x")), vars);
+        evaluator.evaluate(new Assignment(new Constant(4), new Variable("y")), vars);
+        LessThan LT = new LessThan(new Variable("x"), new Variable("y"));
+        ScopeStart S1 = new ScopeStart(new Constant(42));
+        ScopeStart S2 = new ScopeStart(new Constant(4711));
+        Conditional C = new Conditional(LT, S1, S2);
+        SymbolicExpression CR = evaluator.evaluate(C, vars);
+        assertEquals(CR, new Constant(42));
     }
 
 }

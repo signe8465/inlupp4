@@ -18,5 +18,10 @@ public interface Visitor {
     public SymbolicExpression visit(Quit n);
     public SymbolicExpression visit(NamedConstant n);
     public SymbolicExpression visit(ScopeStart n);
-
+    public SymbolicExpression visit(Equals n);
+    public SymbolicExpression visit(GreaterThan n);
+    public SymbolicExpression visit(  GreaterThanOrEqual n);
+    public SymbolicExpression visit(LessThan n);
+    public SymbolicExpression visit(LessThanOrEqual n);
+    public SymbolicExpression visit(Conditional n);
 }
