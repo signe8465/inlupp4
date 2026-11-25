@@ -157,14 +157,11 @@
 
             SymbolicExpression result = this.env.get(new Variable(n.toString()));
             Scope i = scopeStack.getTopScope();
-            int number = 0;
             while(result == null && i.nextScope() != null){
                 result = i.nextScope().getEnvironment().get(new Variable(n.toString()));
-                System.out.println(result + " " + number);
                 i = i.nextScope();
-                number++;
             }
-            
+            // kolla om det är en konstant eller funktion
             if(result != null){
                 return result;
             } else {
@@ -213,6 +210,10 @@
         }
 
         public SymbolicExpression visit(Clear n){
+            return n;
+        }
+
+        public SymbolicExpression visit(End n){
             return n;
         }
 
@@ -332,4 +333,22 @@
                 return n.getElseScope().accept(this);
             }
         }
+
+        public SymbolicExpression visit(FunctionDeclaration n){ 
+            SymbolicExpression key = n.getKey();
+            //Lägg till prepend logiken 
+            // resterande funktionsanrop
+            if(rhs.isNamedConstant()){
+                errorText += "\n" + n;
+                err = true;
+            }
+            if(!err){
+                scopeStack.getVariableList().addNode(rhs);
+                this.env.put((Variable) rhs, lhs); // stoppa in ett funktionsobjekt som innehåller allt
+            }
+            return lhs;
+
+        }
+        
+        
     }

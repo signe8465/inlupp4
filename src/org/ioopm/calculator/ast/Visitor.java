@@ -24,4 +24,7 @@ public interface Visitor {
     public SymbolicExpression visit(LessThan n);
     public SymbolicExpression visit(LessThanOrEqual n);
     public SymbolicExpression visit(Conditional n);
+    public SymbolicExpression visit(End n);
+    public SymbolicExpression visit(Function n);
+    public SymbolicExpression visit(FunctionDeclaration n);
 }

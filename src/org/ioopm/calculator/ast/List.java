@@ -29,4 +29,8 @@ public class List{
         this.first = null;
         this.last = null;
     }
+
+    public SymbolicExpression getValue(){
+        return this.first.getValue();
+    }
 }

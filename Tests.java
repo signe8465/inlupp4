@@ -530,5 +530,21 @@ public class Tests {
         assertEquals(CR, new Constant(42));
     }
 
+    @Test
+    void maxFuncTest(){
+        List params = new List();
+        params.addNode(new Variable("x"));
+        params.addNode(new Variable("y"));
+        FunctionDeclaration max = new FunctionDeclaration(new Variable("max"), params); 
+        ScopeStart S1 = new ScopeStart(new Variable("y"));
+        ScopeStart S2 = new ScopeStart(new Variable("x"));
+        LessThan LT = new Lessthan(new Variable("x"), new Variable("y"));
+        Conditional C = new Conditional(LT, S1, S2);
+        max.addRow(C);
+        max.addRow(new End());
+        evaluator.evaluate(max, vars);
+        
+    }
+
 }
 
