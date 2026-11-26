@@ -1,18 +1,31 @@
 package org.ioopm.calculator.ast; 
 
-public abstract class Function extends SymbolicExpression{
+public class Function extends SymbolicExpression{
     List FunctionRowList;
-    public Function(List ParamList){
-        this.FunctionRowList = new List();
-        prependParams(ParamList);
-    }
+    SymbolicExpression name;
+    List ParamList;
 
-    private void prependParams(List ParamList){
-        SymbolicExpression row = ParamList.getValue();
-        //TODO SÅ ATT DEN FAKTISKT GÖR NÅGOT
+    public Function(SymbolicExpression name, List ParamList){
+        this.FunctionRowList = new List();
+        this.ParamList = ParamList;
+        this.name = name;
     }
 
     public void addRow(SymbolicExpression row){
         FunctionRowList.addNode(row);
     }
+
+    public List getParamList(){
+        return this.ParamList;
+    }
+
+    public List getFunctionRowList(){
+        return this.FunctionRowList;
+    }
+    
+    public SymbolicExpression accept(Visitor v) {
+        return v.visit(this);
+    }
+
+
 }

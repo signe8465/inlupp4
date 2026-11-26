@@ -27,4 +27,6 @@ public interface Visitor {
     public SymbolicExpression visit(End n);
     public SymbolicExpression visit(Function n);
     public SymbolicExpression visit(FunctionDeclaration n);
+    public SymbolicExpression visit(FunctionStart n);
+    
 }

@@ -35,6 +35,22 @@ public abstract class SymbolicExpression {
         throw new IllegalCommandUsageException();
     }
 
+    public boolean isEnd(){
+        return false;
+    }
+
+    public void addRow(SymbolicExpression row){
+        throw new FunctionError("Försöker lägga till en funktionsrad i en icke-Function");
+    }
+
+    public List getFunctionRowList(){
+        throw new FunctionError("Försöker hämta funktionslistan från en icke-Function (sker innan parameterlistan hämtas)"); 
+    }
+
+    public List getParamList(){
+        throw new FunctionError("Försöker hämta Parameterlistan från en icke-Function"); 
+    }
+
     public abstract SymbolicExpression accept(Visitor v);
 
 }

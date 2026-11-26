@@ -10,4 +10,8 @@ public class End extends Command{
         public SymbolicExpression accept(Visitor v) {
             return v.visit(this);
         }
+    
+    public boolean isEnd(){
+        return true;
+    }
 }

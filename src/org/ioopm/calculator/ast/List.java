@@ -18,7 +18,7 @@ public class List{
                 if(n.getValue().equals(current.getValue())){
                     throw new DoubleAssignmentException();
                 }
-                current.getNext();
+                current = current.getNext();
             }
             this.last.setNext(n);
             this.last = n;
@@ -32,5 +32,27 @@ public class List{
 
     public SymbolicExpression getValue(){
         return this.first.getValue();
+    }
+
+    public Node getFirstNode(){
+        return this.first;
+    }
+
+    public void prepend(SymbolicExpression a){
+        Node n = new Node(a);
+        if(this.first == null){
+            this.first = n;
+            this.last = n;
+        } else{
+            Node current = this.first;
+            while(current != null){
+                if(n.getValue().equals(current.getValue())){
+                    throw new DoubleAssignmentException();
+                }
+                current = current.getNext();
+            }
+            n.setNext(this.first);
+            this.first = n;
+        }
     }
 }

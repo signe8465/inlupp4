@@ -538,12 +538,39 @@ public class Tests {
         FunctionDeclaration max = new FunctionDeclaration(new Variable("max"), params); 
         ScopeStart S1 = new ScopeStart(new Variable("y"));
         ScopeStart S2 = new ScopeStart(new Variable("x"));
-        LessThan LT = new Lessthan(new Variable("x"), new Variable("y"));
+        LessThan LT = new LessThan(new Variable("x"), new Variable("y"));
         Conditional C = new Conditional(LT, S1, S2);
         max.addRow(C);
-        max.addRow(new End());
-        evaluator.evaluate(max, vars);
-        
+        SymbolicExpression FC = evaluator.evaluate(max, vars);
+
+        List PL = new List();
+        PL.addNode(new Constant(5));
+        PL.addNode(new Constant(7));
+        SymbolicExpression FR = evaluator.evaluate(new FunctionStart(new Variable("max"), PL), vars);
+       
+        assertEquals(new Variable(" "), FC);
+        assertEquals(new Constant(7), FR);
+    }
+
+    @Test
+    void factorialTest(){
+        List params = new List();
+        params.addNode(new Variable("n"));
+        FunctionDeclaration factorial = new FunctionDeclaration(new Variable("factorial"), params); 
+        Assignment AS = new Assignment(new Subtraction(new Variable("n"), new Constant(1)), new Variable("m"));
+        factorial.addRow(AS);
+        GreaterThan GT = new GreaterThan(new Variable("n"), new Constant(1));
+        List PL1 = new List();
+        PL1.addNode(new Variable("m"));
+        ScopeStart IfScope = new ScopeStart(new Multiplication(new FunctionStart(new Variable("factorial"), PL1), new Variable("n")));
+        ScopeStart ElseScope = new ScopeStart(new Constant(1));
+        Conditional C = new Conditional(GT, IfScope, ElseScope);
+        factorial.addRow(C);
+        SymbolicExpression FC = evaluator.evaluate(factorial, vars);
+        List PL = new List();
+        PL.addNode(new Constant(5));
+        SymbolicExpression FR = evaluator.evaluate(new FunctionStart(new Variable("factorial"), PL), vars);
+        assertEquals(FR, new Constant(120));
     }
 
 }

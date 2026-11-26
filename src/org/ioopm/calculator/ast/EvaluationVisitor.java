@@ -163,7 +163,11 @@
             }
             // kolla om det är en konstant eller funktion
             if(result != null){
-                return result;
+                if(result.isConstant()){
+                    return result;
+                }else{
+                    return result.accept(this);
+                }
             } else {
                 return new Variable(n.toString()); 
             }
@@ -336,19 +340,58 @@
 
         public SymbolicExpression visit(FunctionDeclaration n){ 
             SymbolicExpression key = n.getKey();
-            //Lägg till prepend logiken 
-            // resterande funktionsanrop
-            if(rhs.isNamedConstant()){
+            SymbolicExpression func = n.getFunction();
+            if(key.isNamedConstant()){
                 errorText += "\n" + n;
                 err = true;
             }
             if(!err){
-                scopeStack.getVariableList().addNode(rhs);
-                this.env.put((Variable) rhs, lhs); // stoppa in ett funktionsobjekt som innehåller allt
+                scopeStack.getVariableList().addNode(key);//Kan finnas fel med lagringslogiken här, känns fel men tror det funkar?
+                this.env.put((Variable) key, func); // stoppa in ett funktionsobjekt som innehåller allt
             }
-            return lhs;
-
+            return new Variable(" ");
         }
-        
-        
+
+        public SymbolicExpression visit(Function n){
+            return n;
+        }
+
+        public SymbolicExpression visit(FunctionStart n){
+            this.env = this.scopeStack.push(new Environment());
+            SymbolicExpression Result = new Variable(" ");
+            SymbolicExpression func = n.getKey().accept(this);
+            List Functions = func.getFunctionRowList();
+            if(func.isConstant()){
+                throw new FunctionError("Hittade en konstant istället för en funktion i hashtabellen");
+            }
+            DeclareVariables(func.getParamList(), n.ConstantList);
+
+            Node Iterator = Functions.getFirstNode();
+            while(Iterator != null){
+                System.out.println(Iterator.getValue());
+                Result = Iterator.getValue().accept(this);
+                Iterator = Iterator.getNext();
+            }
+            this.env = this.scopeStack.pop();
+            return Result;
+        }
+
+        public void DeclareVariables(List ParamList, List ConstantList) throws FunctionError{
+            Node iteratorP = ParamList.getFirstNode();
+            Node iteratorC = ConstantList.getFirstNode();
+            while(iteratorP != null && iteratorC != null){
+                SymbolicExpression v = iteratorP.getValue();
+                SymbolicExpression c = iteratorC.getValue();
+                SymbolicExpression row = new Assignment(c, v);
+                row.accept(this);
+                iteratorP = iteratorP.getNext();
+                iteratorC = iteratorC.getNext();
+            }
+            if(iteratorP != null){
+                throw new FunctionError("För få argument");
+            }
+            if(iteratorC != null){
+                throw new FunctionError("För många argument");
+            }
+        }
     }

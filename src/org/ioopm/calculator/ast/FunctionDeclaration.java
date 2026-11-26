@@ -2,13 +2,11 @@ package org.ioopm.calculator.ast;
 
 public class FunctionDeclaration extends SymbolicExpression{
     private SymbolicExpression key;
-    private List ParameterList; 
     private SymbolicExpression FunctionRows;
 
-    public SymbolicExpression FunctionDeclaration(SymbolicExpression key, List ParameterList){
+    public FunctionDeclaration(SymbolicExpression key, List ParameterList){
         this.key = key;
-        this.ParameterList = ParameterList;
-        this.FunctionRows = new Function(ParameterList);
+        this.FunctionRows = new Function(key, ParameterList);
     }
 
     public void addRow(SymbolicExpression r){
@@ -17,5 +15,13 @@ public class FunctionDeclaration extends SymbolicExpression{
 
     public SymbolicExpression getKey(){
         return this.key;
+    }
+
+    public SymbolicExpression getFunction(){
+        return this.FunctionRows;
+    }
+
+    public SymbolicExpression accept(Visitor v) {
+        return v.visit(this);
     }
 }
