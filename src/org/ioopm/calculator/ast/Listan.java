@@ -1,9 +1,9 @@
 package org.ioopm.calculator.ast;
 
-public class List{
+public class Listan{
     private Node first = null;
     private Node last = null;
-    public List(){
+    public Listan(){
 
     }
 

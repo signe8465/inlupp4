@@ -10,3 +10,8 @@ Sparar alla funktioner i samma hashtabell som variables för att slå två flugo
 Både blockar ut variabler med samma namn
 Och sparar funktionsnamn i scopes så att det går att nästla dem osv
 All variabellogik ärvs
+
+
+## README 
+
+

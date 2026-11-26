@@ -532,7 +532,7 @@ public class Tests {
 
     @Test
     void maxFuncTest(){
-        List params = new List();
+        Listan params = new Listan();
         params.addNode(new Variable("x"));
         params.addNode(new Variable("y"));
         FunctionDeclaration max = new FunctionDeclaration(new Variable("max"), params); 
@@ -543,7 +543,7 @@ public class Tests {
         max.addRow(C);
         SymbolicExpression FC = evaluator.evaluate(max, vars);
 
-        List PL = new List();
+        Listan PL = new Listan();
         PL.addNode(new Constant(5));
         PL.addNode(new Constant(7));
         SymbolicExpression FR = evaluator.evaluate(new FunctionStart(new Variable("max"), PL), vars);
@@ -554,23 +554,73 @@ public class Tests {
 
     @Test
     void factorialTest(){
-        List params = new List();
+        Listan params = new Listan();
         params.addNode(new Variable("n"));
         FunctionDeclaration factorial = new FunctionDeclaration(new Variable("factorial"), params); 
         Assignment AS = new Assignment(new Subtraction(new Variable("n"), new Constant(1)), new Variable("m"));
         factorial.addRow(AS);
         GreaterThan GT = new GreaterThan(new Variable("n"), new Constant(1));
-        List PL1 = new List();
+        Listan PL1 = new Listan();
         PL1.addNode(new Variable("m"));
         ScopeStart IfScope = new ScopeStart(new Multiplication(new FunctionStart(new Variable("factorial"), PL1), new Variable("n")));
         ScopeStart ElseScope = new ScopeStart(new Constant(1));
         Conditional C = new Conditional(GT, IfScope, ElseScope);
         factorial.addRow(C);
         SymbolicExpression FC = evaluator.evaluate(factorial, vars);
-        List PL = new List();
+        Listan PL = new Listan();
         PL.addNode(new Constant(5));
         SymbolicExpression FR = evaluator.evaluate(new FunctionStart(new Variable("factorial"), PL), vars);
         assertEquals(FR, new Constant(120));
+    }
+
+    @Test
+    void GCDTest(){
+        Listan params = new Listan();
+        Variable a = new Variable("a");
+        Variable b = new Variable("b");
+        Variable ab = new Variable("ab");
+        Variable ba = new Variable("ba");
+
+        Listan aba = new Listan();
+        aba.addNode(a);
+        aba.addNode(ba);
+
+        Listan abb = new Listan();
+        abb.addNode(ab);
+        abb.addNode(b);
+
+        params.addNode(a);
+        params.addNode(b);
+        FunctionDeclaration gcd = new FunctionDeclaration(new Variable("gcd"), params); 
+        
+
+        Assignment AS1 = new Assignment(new Subtraction(b, a), ba);
+        gcd.addRow(AS1);
+
+        Assignment AS2 = new Assignment(new Subtraction(a, b), ab);
+        gcd.addRow(AS2);
+
+        ScopeStart S1 = new ScopeStart(new FunctionStart(new Variable("gcd"), aba));
+        ScopeStart S2 = new ScopeStart(new FunctionStart(new Variable("gcd"), abb));
+        LessThan LT = new LessThan(new Variable("a"), new Variable("b"));
+        Conditional InnerConditional = new Conditional(LT, S1, S2);
+
+        
+        ScopeStart BigIf = new ScopeStart(a);
+        ScopeStart BigElse = new ScopeStart(InnerConditional);
+        Equals E = new Equals(a, b);
+        Conditional OuterConditional = new Conditional(E, BigIf, BigElse);
+        gcd.addRow(OuterConditional);
+
+        evaluator.evaluate(gcd, vars);
+
+        Listan consts = new Listan();
+        consts.addNode(new Constant(24));
+        consts.addNode(new Constant(36));
+
+        FunctionStart FS = new FunctionStart(new Variable("gcd"), consts);
+        SymbolicExpression FR = evaluator.evaluate(FS, vars);
+        assertEquals(FR, new Constant(12));
     }
 
 }

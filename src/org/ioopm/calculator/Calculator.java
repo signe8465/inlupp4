@@ -8,13 +8,14 @@ public class Calculator {
         Scanner sc = new Scanner(System.in);
         final CalculatorParser parser = new CalculatorParser();
         final EvaluationVisitor evaluator = new EvaluationVisitor();
+        boolean hidePrint = false;
         Environment vars = new Environment();
         SymbolicExpression ans = new Variable("ans");
         boolean run = true;
         System.out.print("\033[2J\033[;H");
         System.out.println("Welcome to the Calculator!");
         while(run){
-            System.out.print("Please enter an expression: ");
+            System.out.print(": ");
             String input = sc.nextLine();
             try{
                 final SymbolicExpression expression = parser.parse(input,vars);

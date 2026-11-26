@@ -5,10 +5,10 @@
         private Stack scopeStack;
         private String errorText = "";
         private boolean err = false;
-        private List variableList = null;
+        private Listan variableListan = null;
         public SymbolicExpression evaluate(SymbolicExpression expression, Environment vars) {
-            variableList = new List();
-            this.scopeStack = new Stack(vars, variableList);
+            variableListan = new Listan();
+            this.scopeStack = new Stack(vars, variableListan);
             this.env = scopeStack.getEnvironment();
             SymbolicExpression tmp = null;
             try{
@@ -190,7 +190,7 @@
                 err = true;
             }
             if(!err){
-                scopeStack.getVariableList().addNode(rhs);
+                scopeStack.getVariableListan().addNode(rhs);
                 this.env.put((Variable) rhs, lhs);
             }
             return lhs;
@@ -340,13 +340,13 @@
 
         public SymbolicExpression visit(FunctionDeclaration n){ 
             SymbolicExpression key = n.getKey();
-            SymbolicExpression func = n.getFunction();
+            Function func = n.getFunction();
             if(key.isNamedConstant()){
                 errorText += "\n" + n;
                 err = true;
             }
             if(!err){
-                scopeStack.getVariableList().addNode(key);//Kan finnas fel med lagringslogiken här, känns fel men tror det funkar?
+                scopeStack.getVariableListan().addNode(key);//Kan finnas fel med lagringslogiken här, känns fel men tror det funkar?
                 this.env.put((Variable) key, func); // stoppa in ett funktionsobjekt som innehåller allt
             }
             return new Variable(" ");
@@ -360,15 +360,14 @@
             this.env = this.scopeStack.push(new Environment());
             SymbolicExpression Result = new Variable(" ");
             SymbolicExpression func = n.getKey().accept(this);
-            List Functions = func.getFunctionRowList();
+            Listan Functions = func.getFunctionRowListan();
             if(func.isConstant()){
                 throw new FunctionError("Hittade en konstant istället för en funktion i hashtabellen");
             }
-            DeclareVariables(func.getParamList(), n.ConstantList);
+            DeclareVariables(func.getParamListan(), n.ConstantListan);
 
             Node Iterator = Functions.getFirstNode();
             while(Iterator != null){
-                System.out.println(Iterator.getValue());
                 Result = Iterator.getValue().accept(this);
                 Iterator = Iterator.getNext();
             }
@@ -376,9 +375,9 @@
             return Result;
         }
 
-        public void DeclareVariables(List ParamList, List ConstantList) throws FunctionError{
-            Node iteratorP = ParamList.getFirstNode();
-            Node iteratorC = ConstantList.getFirstNode();
+        public void DeclareVariables(Listan ParamListan, Listan ConstantListan) throws FunctionError{
+            Node iteratorP = ParamListan.getFirstNode();
+            Node iteratorC = ConstantListan.getFirstNode();
             while(iteratorP != null && iteratorC != null){
                 SymbolicExpression v = iteratorP.getValue();
                 SymbolicExpression c = iteratorC.getValue();

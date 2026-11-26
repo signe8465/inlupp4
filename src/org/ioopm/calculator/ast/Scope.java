@@ -3,7 +3,7 @@ package org.ioopm.calculator.ast;
 public class Scope{
     private Environment vars;
     private Scope nextScope = null;
-    private List list = null;
+    private Listan Listan = null;
     public Scope(){
         vars = new Environment();
     }
@@ -24,11 +24,11 @@ public class Scope{
         this.vars = en;
     }
 
-    public void setList(List l){
-        this.list = l;
+    public void setListan(Listan l){
+        this.Listan = l;
     }
 
-    public List getVariableList(){
-        return this.list;
+    public Listan getVariableListan(){
+        return this.Listan;
     }
 }

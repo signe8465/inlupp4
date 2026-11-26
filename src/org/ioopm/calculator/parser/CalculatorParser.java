@@ -14,6 +14,9 @@ import java.util.*;
 public class CalculatorParser {
     private StreamTokenizer st;
     private Environment vars;
+    private Variable CurrentFunction = null;
+    private boolean EndFunction = true;
+    private boolean isDeclaringFunction = false;
     private static char MULTIPLY = '*';
     private static char ADDITION = '+';
     private static char SUBTRACTION = '-';
@@ -32,13 +35,15 @@ public class CalculatorParser {
     private static String LESSTHANOREQUAL = "=";
     private static String GREATERTHANOREQUAL = ">=";
     private static String EQUALS = "==";
+    private static String FUNCTION = "function";
+    private static String END = "end";
 
     // unallowerdVars is used to check if variabel name that we
     // want to assign new meaning to is a valid name eg 3 = Quit
     // or 10 + x = L is not allowed
     private final ArrayList < String > unallowedVars = new ArrayList < String > (Arrays.asList("Quit",
         "Vars",
-        "Clear")); //FÖRBJUDNA HÄR
+        "Clear", "end")); //FÖRBJUDNA HÄR
 
     /**
      * Used to parse the inputted string by the Calculator program
@@ -56,8 +61,13 @@ public class CalculatorParser {
         this.st.ordinaryChar('>');
         this.st.ordinaryChar('<');
         this.st.eolIsSignificant(true);
-        SymbolicExpression result = statement(); // calls to statement
-        return result; // the final result
+        if(EndFunction){
+            SymbolicExpression result = statement(); // calls to statement
+            return result; // the final result
+        } else{
+            this.EndFunction = buildFunction();
+            return new Variable(" ");
+        }
     }
 
     /**
@@ -73,10 +83,10 @@ public class CalculatorParser {
             throw new SyntaxErrorException("Error: Expected an expression");
         }
         if (this.st.ttype == this.st.TT_WORD) { // vilken typ det senaste tecken vi lÃ¤ste in hade.
-            if (this.st.sval.equals("Quit") || this.st.sval.equals("Vars") || this.st.sval.equals("Clear")) { // sval = string Variable
+            if (this.st.sval.equals("Quit") || this.st.sval.equals("Vars") || this.st.sval.equals("Clear") || this.st.sval.equals("end")) { // sval = string Variable
                 result = command();
-            } else if(this.st.sval.equals(IF)){
-                result = function();
+            } else if(this.st.sval.equals(FUNCTION)){
+                result = functionDeclaration();
             }else{
                 result = assignment(); // går vidare med uttrycket.
             }
@@ -105,8 +115,10 @@ public class CalculatorParser {
             return Quit.instance();
         } else if (this.st.sval.equals("Clear")) {
             return Clear.instance();
-        } else {
+        } else if (this.st.sval.equals("Vars")){
             return Vars.instance();
+        } else{
+            return End.instance();
         } 
     }
 
@@ -156,8 +168,9 @@ public class CalculatorParser {
     
         if (Constants.namedConstants.containsKey(this.st.sval)) {
             result = new NamedConstant(st.sval, Constants.namedConstants.get(st.sval));
-        } else {
-            result = new Variable(this.st.sval);
+        } 
+        else {
+            result = functionStart();
         }
         return result;
     }
@@ -224,16 +237,14 @@ public class CalculatorParser {
      */
     private SymbolicExpression primary() throws IOException {
         SymbolicExpression result ;
-        if (this.st.ttype == '(') { //HÄR LÄGGER VI IN LOGIK RUNT SLUTPARANTESER
+        if (this.st.ttype == '(') { 
             this.st.nextToken();
             result = assignment();
             /// This captures unbalanced parentheses!
             if (this.st.nextToken() != ')') {
                 throw new SyntaxErrorException("expected ')'");
             }
-        
-        } 
-        else if (this.st.ttype == NEGATION || this.st.ttype == SCOPESTART) {
+        } else if (this.st.ttype == NEGATION || this.st.ttype == SCOPESTART) {
             result = unary();
         } else if (this.st.ttype == this.st.TT_WORD) {
             if (st.sval.equals(SIN) ||
@@ -245,6 +256,8 @@ public class CalculatorParser {
                 {
 
                 result = unary();
+            } else if(this.st.sval.equals(IF)){
+                result = conditional();
             } else {
                 result = identifier();
             }
@@ -293,12 +306,12 @@ public class CalculatorParser {
     }
 
        /**
-     * Checks what type of Function operation the token read is and
+     * Checks what type of conditional operation the token read is and
      * then continues with the expression that the operator holds
      * @return a SymbolicExpression to be evaluated
      * @throws IOException by nextToken() if it reads invalid input
      */
-    private SymbolicExpression function() throws IOException {
+    private SymbolicExpression conditional() throws IOException {
         SymbolicExpression result = null;
         if(this.st.sval.equals(IF))
         {
@@ -322,7 +335,7 @@ public class CalculatorParser {
 
         }
         if(result == null){
-            throw new SyntaxErrorException("Något gick fel i function()");
+            throw new SyntaxErrorException("Något gick fel i conditional()");
         }
         return result;
     }
@@ -367,4 +380,66 @@ public class CalculatorParser {
             return result = new Equals(result, expression());
         }
     }
+
+    private SymbolicExpression functionDeclaration() throws IOException{
+        this.st.nextToken();
+        isDeclaringFunction = true;
+        SymbolicExpression key = identifier();
+        //check för om det är en variabel
+        Listan paramListan = new Listan();
+        this.st.nextToken();
+        if (this.st.ttype == '(') { 
+            this.st.nextToken(); 
+
+            while(this.st.ttype != ')'){
+                if(this.st.ttype != ','){
+                    SymbolicExpression paramVariable = identifier();
+                    paramListan.addNode(paramVariable);
+                } 
+                this.st.nextToken();
+            }
+        } 
+        
+        FunctionDeclaration f = new FunctionDeclaration((Variable) key, paramListan);
+        CurrentFunction =(Variable) key;
+        this.vars.put((Variable)key, f.getFunction());
+        EndFunction = false;
+        isDeclaringFunction = false;
+        return new Variable("");
+    }
+
+    private boolean buildFunction() throws IOException{
+        SymbolicExpression row = statement();
+        if(row.isEnd()){
+            return true;
+        }
+        SymbolicExpression f = this.vars.get(CurrentFunction);
+        f.addRow(row);
+        this.vars.put(CurrentFunction,(Function) f);
+        return false;
+    }
+
+    private SymbolicExpression functionStart() throws IOException{
+        SymbolicExpression key = new Variable(this.st.sval);
+        if(isDeclaringFunction){
+            return key;
+        }
+        Listan ConstantList = new Listan();
+        this.st.nextToken();
+        if (this.st.ttype == '(') { 
+            this.st.nextToken(); 
+            while(this.st.ttype != ')'){
+                if(this.st.ttype != ','){
+                    SymbolicExpression ConstantVariable = expression();
+                    ConstantList.addNode(ConstantVariable);
+                } 
+                this.st.nextToken();
+            }
+        } else{
+            this.st.pushBack();
+            return key;
+        }
+        return new FunctionStart(key, ConstantList);
+    }
+
 }

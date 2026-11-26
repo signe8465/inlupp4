@@ -4,10 +4,10 @@ public class Stack{
     private Scope topScope;
     private Scope baseScope;
 
-    public Stack(Environment vars, List l){
+    public Stack(Environment vars, Listan l){
         Scope tmp = new Scope();
         tmp.setEnvironment(vars);
-        tmp.setList(l);
+        tmp.setListan(l);
         baseScope = tmp;
         topScope = baseScope;
     }
@@ -23,7 +23,7 @@ public class Stack{
         Scope tmp = new Scope();
         tmp.setEnvironment(en);
         tmp.setNext(topScope);
-        tmp.setList(new List());
+        tmp.setListan(new Listan());
         this.topScope = tmp;
         return this.getEnvironment();
     }
@@ -32,8 +32,8 @@ public class Stack{
         return this.topScope.getEnvironment();
     }
 
-    public List getVariableList(){
-        return this.topScope.getVariableList();
+    public Listan getVariableListan(){
+        return this.topScope.getVariableListan();
     }
 
     public Scope getTopScope(){

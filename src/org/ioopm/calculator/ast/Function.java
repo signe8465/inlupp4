@@ -1,26 +1,26 @@
 package org.ioopm.calculator.ast; 
 
 public class Function extends SymbolicExpression{
-    List FunctionRowList;
+    Listan FunctionRowListan;
     SymbolicExpression name;
-    List ParamList;
+    Listan ParamListan;
 
-    public Function(SymbolicExpression name, List ParamList){
-        this.FunctionRowList = new List();
-        this.ParamList = ParamList;
+    public Function(SymbolicExpression name, Listan ParamListan){
+        this.FunctionRowListan = new Listan();
+        this.ParamListan = ParamListan;
         this.name = name;
     }
 
     public void addRow(SymbolicExpression row){
-        FunctionRowList.addNode(row);
+        FunctionRowListan.addNode(row);
     }
 
-    public List getParamList(){
-        return this.ParamList;
+    public Listan getParamListan(){
+        return this.ParamListan;
     }
 
-    public List getFunctionRowList(){
-        return this.FunctionRowList;
+    public Listan getFunctionRowListan(){
+        return this.FunctionRowListan;
     }
     
     public SymbolicExpression accept(Visitor v) {

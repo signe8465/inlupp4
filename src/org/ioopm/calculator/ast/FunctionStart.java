@@ -2,20 +2,20 @@ package org.ioopm.calculator.ast;
 
 public class FunctionStart extends SymbolicExpression{
     SymbolicExpression key;
-    List ConstantList;
-    public FunctionStart(SymbolicExpression key, List ConstantList){
+    Listan ConstantListan;
+    public FunctionStart(SymbolicExpression key, Listan ConstantListan){
         this.key = key;
-        this.ConstantList = ConstantList;
+        this.ConstantListan = ConstantListan;
     }
 
-    public List prependParams(List ParamList, List FunctionRowList) throws FunctionError{
-        Node iteratorP = ParamList.getFirstNode();
-        Node iteratorC = this.ConstantList.getFirstNode();
+    public Listan prependParams(Listan ParamListan, Listan FunctionRowListan) throws FunctionError{
+        Node iteratorP = ParamListan.getFirstNode();
+        Node iteratorC = this.ConstantListan.getFirstNode();
         while(iteratorP != null && iteratorC != null){
             SymbolicExpression v = iteratorP.getValue();
             SymbolicExpression c = iteratorC.getValue();
             SymbolicExpression row = new Assignment(c, v);
-            FunctionRowList.prepend(row);
+            FunctionRowListan.prepend(row);
 
             iteratorP = iteratorP.getNext();
             iteratorC = iteratorC.getNext();
@@ -26,7 +26,7 @@ public class FunctionStart extends SymbolicExpression{
         if(iteratorC != null){
             throw new FunctionError("För många argument");
         }
-        return FunctionRowList;
+        return FunctionRowListan;
     }
 
     public SymbolicExpression getKey(){
